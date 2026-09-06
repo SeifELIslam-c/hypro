@@ -1,12 +1,13 @@
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowUpRight, Layers } from "lucide-react";
+import { ArrowLeft, ArrowDown, ArrowUpRight, Layers, Sparkles, Building2 } from "lucide-react";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ContactSection } from "@/components/site/ContactSection";
-import { Reveal } from "@/components/site/Reveal";
+import { Reveal, BlurReveal } from "@/components/site/Reveal";
 import { ScrollProgress } from "@/components/site/ScrollProgress";
-import { VrButton } from "@/components/site/VrButton";
-import { SplitText, ScrollText } from "@/components/site/Motion";
+import { SplitText, ScrollText, Parallax } from "@/components/site/Motion";
+import { UnitTypeCard } from "@/components/site/UnitTypeCard";
 import { getProject, type Project, type Block } from "@/data/projects";
 import { cn } from "@/lib/utils";
 
@@ -86,204 +87,272 @@ export const Route = createFileRoute("/blocs/$slug/$blockId")({
   component: BlockPage,
 });
 
-
 function BlockPage() {
   const { project, block } = Route.useLoaderData() as { project: Project; block: Block };
   const siblings = (project.blocks ?? []).filter((b) => b.id !== block.id);
 
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const heroImages =
+    block.heroImages && block.heroImages.length > 0
+      ? block.heroImages
+      : block.heroImage
+        ? [{ src: block.heroImage, title: "Vue Principale" }]
+        : [{ src: project.hero, title: "Vue Principale" }];
+
+  const [activePlayingCode, setActivePlayingCode] = useState<string | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Automatic slow cinematic cycling between the hero images
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % heroImages.length);
+    }, 6500);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
+  // Video playback synchronization:
+  // Stops video when user scrolls, and plays ONLY when user stops scrolling on a visible unit
+  useEffect(() => {
+    const checkVisibleUnit = () => {
+      const elements = document.querySelectorAll<HTMLElement>("[data-unit-code]");
+      if (!elements.length) return;
+
+      const vh = window.innerHeight;
+      const centerY = vh / 2;
+      let closestCode: string | null = null;
+      let minDistance = Infinity;
+
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        // Element is visible within viewport range
+        if (rect.bottom > 120 && rect.top < vh - 120) {
+          const elementCenter = (rect.top + rect.bottom) / 2;
+          const dist = Math.abs(elementCenter - centerY);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closestCode = el.getAttribute("data-unit-code");
+          }
+        }
+      });
+
+      setActivePlayingCode(closestCode);
+    };
+
+    const onScroll = () => {
+      // Immediately stop video playback while scrolling
+      setActivePlayingCode(null);
+
+      // When the user stops scrolling (debounced), find the unit in view and play
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        checkVisibleUnit();
+      }, 420);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    const initialTimer = setTimeout(checkVisibleUnit, 900);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      clearTimeout(initialTimer);
+    };
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (typeof window === "undefined") return;
+    const { innerWidth, innerHeight } = window;
+    const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
+    const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
+    setMousePos({ x, y });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <ScrollProgress />
-      <SiteHeader />
+      <SiteHeader transparent />
 
-      <main className="page-in mx-auto max-w-[1600px] px-5 pb-20 pt-28 md:px-10 md:pb-32 md:pt-40">
-        <Reveal>
-          <Link
-            to="/projets/$slug"
-            params={{ slug: project.slug }}
-            className="label-xs group inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-wine"
+      {/* ULTRA-MINIMALIST FULL-BLEED PARALLAX HERO WITH DYNAMIC MOTION */}
+      <section
+        onMouseMove={handleMouseMove}
+        className="relative h-[100svh] min-h-[640px] overflow-hidden bg-charcoal"
+      >
+        {/* PARALLAX BACKGROUND WITH SMOOTH MOTION & IMAGE CROSS-FADE */}
+        <Parallax speed={80} scale className="absolute inset-0 size-full">
+          <div
+            className="size-full will-change-transform transition-transform duration-700 ease-out"
+            style={{
+              transform: `scale(1.06) translate3d(${mousePos.x * -12}px, ${mousePos.y * -12}px, 0)`,
+            }}
           >
-            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-            {project.shortName}
-          </Link>
-        </Reveal>
+            {heroImages.map((img, idx) => (
+              <img
+                key={img.src}
+                src={img.src}
+                alt={`${block.name} — Perspective ${idx + 1}`}
+                fetchPriority={idx === 0 ? "high" : "low"}
+                decoding="async"
+                className={cn(
+                  "absolute inset-0 size-full object-cover transition-all duration-[1400ms] ease-out will-change-transform",
+                  heroIndex === idx
+                    ? "opacity-100 scale-105"
+                    : "opacity-0 scale-100 pointer-events-none",
+                )}
+              />
+            ))}
+          </div>
+        </Parallax>
 
-        {/* BLOC HEADER */}
-        <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">
-          <Reveal className="bento grain-gold relative overflow-hidden border border-border bg-charcoal p-8 text-charcoal-foreground md:p-14">
-            <span className="label-xs inline-flex items-center gap-2 rounded-full bg-charcoal-foreground/10 px-4 py-2">
-              <Layers className="size-3.5 text-gold" /> Architecture
-            </span>
+        {/* LUXURY ARCHITECTURAL GRADIENT OVERLAYS */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-charcoal/70 via-charcoal/20 to-charcoal/90" />
+        <div className="pointer-events-none absolute inset-0 bg-radial from-transparent via-transparent to-charcoal/70" />
+
+        {/* HERO FOREGROUND CONTENT (CLEAN & MINIMALIST) */}
+        <div className="relative mx-auto flex h-full max-w-[1600px] flex-col justify-end px-6 pb-12 pt-28 md:px-12 md:pb-16 md:pt-36">
+          {/* DISCREET BREADCRUMB */}
+          <div>
+            <Link
+              to="/projets/$slug"
+              params={{ slug: project.slug }}
+              className="label-xs group inline-flex items-center gap-2 text-charcoal-foreground/75 transition-colors hover:text-gold"
+            >
+              <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-1" />
+              {project.shortName}
+            </Link>
+          </div>
+
+          {/* MONUMENTAL MINIMALIST TITLE */}
+          <div className="mt-6">
             <SplitText
               as="h1"
               text={block.name.toUpperCase()}
               stagger={80}
-              className="mt-8 font-display text-[3.4rem] leading-[0.9] md:text-[7rem]"
+              className="font-display text-[clamp(4.2rem,13vw,9.5rem)] leading-[0.88] tracking-[-0.02em] text-charcoal-foreground"
             />
-            <p className="mt-6 max-w-xl font-display text-[1.6rem] leading-tight text-gold md:text-[2.4rem]">
-              {block.headline}
+            <p className="mt-3 font-display text-[clamp(1.4rem,3vw,2.2rem)] text-gold/90 tracking-wide">
+              RÉSIDENCE HYPRO · CHÉRAGA
             </p>
-            <p className="mt-6 max-w-2xl leading-relaxed text-charcoal-foreground/70">
-              {block.desc}
-            </p>
-          </Reveal>
+          </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            {block.stats.map((s, i) => (
-              <Reveal
-                key={s.label}
-                delay={100 + i * 80}
-                className={cn(
-                  "bento hover-lift flex items-baseline justify-between gap-4 border border-border p-6 md:p-8",
-                  i === 0 ? "bg-wine text-wine-foreground" : "bg-card",
-                )}
+          {/* BOTTOM CONTROLS: MINIMALIST SWITCHER & SCROLL PROMPT */}
+          <div className="mt-12 flex flex-wrap items-center justify-between gap-6 pt-6 border-t border-charcoal-foreground/15">
+            {/* MINIMALIST IMAGE INDICATORS (01 / 02) */}
+            {heroImages.length > 1 ? (
+              <div className="flex items-center gap-4">
+                {heroImages.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setHeroIndex(i)}
+                    className="group flex items-center gap-2.5 py-1 text-left transition-all"
+                  >
+                    <span
+                      className={cn(
+                        "label-xs text-[0.7rem] transition-colors",
+                        heroIndex === i
+                          ? "text-gold font-semibold"
+                          : "text-charcoal-foreground/50 group-hover:text-charcoal-foreground/80",
+                      )}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={cn(
+                        "block h-0.5 transition-all duration-500 rounded-full",
+                        heroIndex === i ? "w-10 bg-gold" : "w-4 bg-charcoal-foreground/30 group-hover:w-6",
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div />
+            )}
+
+            {/* ACTION & DISCOVERY */}
+            <div className="flex items-center gap-3">
+
+              <a
+                href="#typologies"
+                className="label-xs inline-flex items-center gap-2.5 rounded-full border border-charcoal-foreground/20 bg-charcoal/60 px-6 py-3.5 text-charcoal-foreground backdrop-blur-md transition-all hover:bg-gold hover:text-charcoal hover:border-gold"
               >
-                <p
-                  className={cn(
-                    "label-xs",
-                    i === 0 ? "text-wine-foreground/60" : "text-muted-foreground",
-                  )}
-                >
-                  {s.label}
-                </p>
-                <p className="font-display text-4xl leading-none md:text-5xl">{s.value}</p>
-              </Reveal>
-            ))}
+                Découvrir
+                <ArrowDown className="size-3.5 animate-bounce" />
+              </a>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* UNIT TYPES */}
-        <section className="mt-16 md:mt-24">
-          <Reveal className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-            <div>
-              <p className="label-xs text-muted-foreground">Typologies</p>
-              <h2 className="mt-4 font-display text-[2.4rem] leading-[0.95] md:text-[4.5rem]">
-                LES TYPES
-              </h2>
-            </div>
-            <p className="max-w-sm text-muted-foreground">
-              Chaque typologie dispose de sa propre visite immersive 360° et de son relevé de
-              surfaces.
-            </p>
+      {/* CONTINUOUS DRIFTING MARQUEE BANNER */}
+      <ScrollText
+        text={`${block.name.toUpperCase()} · HYPRO CHERAGA · LUXURY LIVING · 3D PLANS · RESIDENCE HYPRO · `}
+        distance={280}
+        className="relative z-10 bg-charcoal pb-14 pt-8 font-display text-[clamp(2.5rem,6.5vw,5.5rem)] leading-none text-charcoal-foreground/10 md:pb-20 md:pt-12"
+      />
+
+      {/* MAIN CONTENT: UNIT TYPOLOGIES WITH SOFT BLUR REVEAL */}
+      <main className="mx-auto max-w-[1600px] px-4 pb-16 pt-8 sm:px-6 sm:pb-24 sm:pt-12 md:px-10 md:pb-36 md:pt-16">
+        <section id="typologies" className="scroll-mt-28">
+          <Reveal className="flex flex-col gap-2 sm:gap-3">
+            <span className="label-xs text-wine font-semibold tracking-widest">
+              {block.name} · Typologies
+            </span>
+            <h2 className="font-display text-[2.2rem] leading-[0.92] text-foreground sm:text-[2.8rem] md:text-[4.8rem]">
+              LES TYPES
+            </h2>
           </Reveal>
 
-          <div className="mt-10 space-y-4">
-            {block.units.map((u, i) => (
-              <Reveal key={u.code} delay={i * 90}>
-                <article className="bento group relative overflow-hidden border border-border bg-card transition-colors duration-700 hover:border-wine/30">
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute -right-32 -top-32 size-80 rounded-full bg-wine/[0.07] opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-100"
-                  />
-                  <div className="relative grid gap-8 p-7 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:p-10">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <span className="label-xs rounded-full bg-charcoal px-3 py-1.5 text-charcoal-foreground">
-                          {u.code}
-                        </span>
-                        <span className="label-xs text-wine">{u.tag}</span>
-                      </div>
-                      <h3 className="mt-6 font-display text-[2.4rem] leading-[0.95] md:text-[3.4rem]">
-                        {u.name}
-                      </h3>
-                      <p className="mt-5 max-w-md leading-relaxed text-muted-foreground">
-                        {u.desc}
-                      </p>
-                      <VrButton
-                        href={project.vrUrl}
-                        poster={u.poster}
-                        title={`${u.name} — ${block.name}`}
-                        variant="outline"
-                        className="mt-8"
-                        label={`Visite VR — ${u.name}`}
-                      />
-                    </div>
-
-                    {u.surfaces && (
-                      <div className="min-w-0">
-                        <div className="rounded-[1.4rem] border border-border bg-sand/50 p-6 md:p-7">
-                          <div className="flex items-baseline justify-between gap-3">
-                            <p className="label-xs text-muted-foreground">Relevé de surfaces</p>
-                            <p className="label-xs text-wine">m²</p>
-                          </div>
-                          <ul className="mt-5 grid gap-x-8 gap-y-1 sm:grid-cols-2">
-                            {u.surfaces.map((s, j) => (
-                              <li
-                                key={s.label + j}
-                                className="flex items-baseline justify-between gap-4 border-b border-border/70 py-2.5 last:border-0"
-                              >
-                                <span className="truncate text-sm text-muted-foreground">
-                                  {s.label}
-                                </span>
-                                <span className="shrink-0 font-display text-lg">{s.value}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {u.totals && (
-                          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                            {u.totals.map((t, k) => (
-                              <div
-                                key={t.label}
-                                className={cn(
-                                  "rounded-[1.2rem] border border-border p-5",
-                                  k === u.totals!.length - 1
-                                    ? "bg-wine text-wine-foreground"
-                                    : "bg-card",
-                                )}
-                              >
-                                <p
-                                  className={cn(
-                                    "label-xs",
-                                    k === u.totals!.length - 1
-                                      ? "text-wine-foreground/60"
-                                      : "text-muted-foreground",
-                                  )}
-                                >
-                                  {t.label}
-                                </p>
-                                <p className="mt-3 font-display text-[1.8rem] leading-none">
-                                  {t.value}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </article>
+          {/* UNIT CARDS WITH CRISP, SMOOTH REVEAL ANIMATION */}
+          <div className="mt-6 space-y-6 sm:mt-10 sm:space-y-8 md:mt-12 md:space-y-12">
+            {block.units.map((unit, i) => (
+              <Reveal key={unit.code} delay={i * 100}>
+                <UnitTypeCard
+                  unit={unit}
+                  blockName={block.name}
+                  projectVrUrl={project.vrUrl}
+                  index={i}
+                  isPlaying={activePlayingCode === unit.code}
+                  projectSlug={project.slug}
+                />
               </Reveal>
             ))}
           </div>
         </section>
 
-        <ScrollText
-          text={`${block.name.toUpperCase()} · ${project.shortName.toUpperCase()} · HYPRO`}
-          distance={240}
-          className="mt-16 font-display text-[12vw] leading-none text-wine/10 md:mt-24 md:text-[8vw]"
-        />
-
+        {/* SIBLING BLOCKS NAVIGATION */}
         {siblings.length > 0 && (
-          <Reveal className="mt-8 grid gap-4 md:grid-cols-2">
-            {siblings.map((b) => (
-              <Link
-                key={b.id}
-                to="/blocs/$slug/$blockId"
-                params={{ slug: project.slug, blockId: b.id }}
-                className="bento group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border border-border bg-card p-8 transition-colors hover:bg-sand"
-              >
-                <div className="min-w-0">
-                  <p className="label-xs text-muted-foreground">Bloc suivant</p>
-                  <p className="mt-4 font-display text-3xl">{b.name}</p>
-                </div>
-                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-charcoal text-charcoal-foreground transition-transform group-hover:rotate-45">
-                  <ArrowUpRight className="size-5" />
-                </span>
-              </Link>
-            ))}
-          </Reveal>
+          <section className="mt-24 md:mt-36">
+            <Reveal>
+              <p className="label-xs text-muted-foreground mb-3">Poursuivre la découverte</p>
+              <h3 className="font-display text-3xl md:text-4xl mb-8">Autres blocs de la résidence</h3>
+            </Reveal>
+
+            <Reveal className="grid gap-6 md:grid-cols-2">
+              {siblings.map((b) => (
+                <Link
+                  key={b.id}
+                  to="/blocs/$slug/$blockId"
+                  params={{ slug: project.slug, blockId: b.id }}
+                  className="bento group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 border border-border bg-card p-8 transition-all duration-500 hover:border-gold/50 hover:bg-sand/40 md:p-10"
+                >
+                  <div className="min-w-0">
+                    <p className="label-xs text-muted-foreground group-hover:text-wine transition-colors">
+                      Découvrir
+                    </p>
+                    <p className="mt-3 font-display text-3xl md:text-4xl">{b.name}</p>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{b.headline}</p>
+                  </div>
+                  <span className="grid size-14 shrink-0 place-items-center rounded-full bg-charcoal text-charcoal-foreground transition-all duration-500 group-hover:bg-gold group-hover:text-charcoal group-hover:rotate-45 group-hover:scale-110">
+                    <ArrowUpRight className="size-6" />
+                  </span>
+                </Link>
+              ))}
+            </Reveal>
+          </section>
         )}
       </main>
 
@@ -292,3 +361,4 @@ function BlockPage() {
     </div>
   );
 }
+

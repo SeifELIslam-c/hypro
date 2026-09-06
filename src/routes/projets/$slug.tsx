@@ -10,7 +10,6 @@ import { ScrollProgress } from "@/components/site/ScrollProgress";
 import { FeatureGrid } from "@/components/site/FeatureGrid";
 import { SurfaceBoard } from "@/components/site/SurfaceBoard";
 import { BlockShowcase } from "@/components/site/BlockShowcase";
-import { VrButton } from "@/components/site/VrButton";
 import { Marquee, Parallax, ScrollText, SplitText } from "@/components/site/Motion";
 import { getProject, projects, type Project } from "@/data/projects";
 import { cn } from "@/lib/utils";
@@ -220,15 +219,6 @@ function ProjectPage() {
                 L'expérience visuelle
               </h2>
             </div>
-            {!project.blocks && (
-              <VrButton
-                href={project.vrUrl}
-                poster={project.hero}
-                title={project.name}
-                variant="glass"
-                className="justify-self-start sm:justify-self-end"
-              />
-            )}
 
           </div>
           <div className="mt-8">

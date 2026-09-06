@@ -188,7 +188,7 @@ function Home() {
 
         <div
           ref={heroContentRef}
-          className="relative mx-auto flex h-full max-w-[1600px] flex-col justify-end px-5 pb-10 pt-24 will-change-transform md:px-10 md:pb-16 md:pt-32"
+          className="relative mx-auto flex h-full max-w-[1600px] flex-col justify-end px-5 pb-14 pt-20 will-change-transform md:px-10 md:pb-16 md:pt-32"
         >
           <div
             className={cn(
@@ -243,9 +243,9 @@ function Home() {
             </div>
           </div>
 
-          <div className="mt-10 flex items-center gap-3 text-charcoal-foreground/60">
+          <div className="mt-6 flex items-center gap-3 text-charcoal-foreground/60 md:mt-10">
             <span className="label-xs">Découvrir</span>
-            <ArrowDown className="size-4 animate-bounce" />
+            <ArrowDown className="size-4 animate-bounce text-gold" />
           </div>
         </div>
       </section>

@@ -153,8 +153,8 @@ export function MediaCarousel({
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/55 via-transparent to-transparent" />
             <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 p-5 md:p-8">
-              <span className="label-xs text-charcoal-foreground/80">
-                {String(i + 1).padStart(2, "0")} — {m.alt}
+              <span className="label-xs text-charcoal-foreground/80 font-mono">
+                {String(i + 1).padStart(2, "0")}
               </span>
             </figcaption>
           </figure>

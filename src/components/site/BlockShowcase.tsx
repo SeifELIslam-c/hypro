@@ -39,6 +39,15 @@ export function BlockShowcase({ blocks, slug }: { blocks: Block[]; slug: string 
                   className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-gold/25 opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-100"
                 />
 
+                {b.heroImage && (
+                  <img
+                    src={b.heroImage}
+                    alt={b.name}
+                    loading="lazy"
+                    className="pointer-events-none absolute inset-0 size-full object-cover opacity-0 transition-all duration-700 group-hover:opacity-15 group-hover:scale-105"
+                  />
+                )}
+
                 <div className="relative flex items-start justify-between gap-6">
                   <div>
                     <p className="label-xs text-muted-foreground transition-colors duration-700 group-hover:text-charcoal-foreground/50">

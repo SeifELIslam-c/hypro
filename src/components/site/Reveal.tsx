@@ -46,6 +46,51 @@ export function Reveal({
   );
 }
 
+export function BlurReveal({
+  children,
+  className,
+  delay = 0,
+  as: As = "div",
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  as?: "div" | "section" | "li" | "span" | "article";
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setShown(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <As
+      ref={ref as never}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={cn("blur-reveal-init", shown && "blur-reveal-in", className)}
+    >
+      {children}
+    </As>
+  );
+}
+
 export function useCountUp(target: number, active: boolean, duration = 1400) {
   const [value, setValue] = useState(0);
   useEffect(() => {

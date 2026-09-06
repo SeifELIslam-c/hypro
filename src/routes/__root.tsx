@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -189,11 +191,30 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isLoading = useRouterState({ select: (s) => s.status === "pending" });
+
+  useEffect(() => {
+    // Instantly reset scroll to top on route change without any visible scroll-up animation
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* LUXURY ROUTE LOADING PROGRESS BAR */}
+      {isLoading && (
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-[99999] h-[2.5px] overflow-hidden bg-transparent">
+          <div className="h-full w-full bg-gradient-to-r from-gold via-wine to-gold animate-pulse" />
+        </div>
+      )}
+
+      {/* PAGE TRANSITION CONTAINER */}
+      <div key={location.pathname} className="page-transition min-h-screen">
+        <Outlet />
+      </div>
+
       <Toaster position="bottom-right" />
     </QueryClientProvider>
   );

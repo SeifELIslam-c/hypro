@@ -133,6 +133,23 @@
   filter: blur(0);
 }
 
+@utility blur-reveal-init {
+  opacity: 0;
+  filter: blur(28px);
+  transform: translate3d(0, 42px, 0) scale(0.97);
+  transition:
+    opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, filter, transform;
+}
+
+@utility blur-reveal-in {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
 
 @utility no-scrollbar {
   scrollbar-width: none;
@@ -209,16 +226,32 @@
   animation: page-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* ---------- global smooth scroll (Bugatti-style easing feel) ---------- */
+/* ---------- scroll behavior (instant on route changes, smooth only on targeted anchors) ---------- */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-padding-top: 6rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+@media (prefers-reduced-motion: no-preference) {
+  html:has(:target) {
+    scroll-behavior: smooth;
   }
+}
+
+/* ---------- luxury page transition ---------- */
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.page-transition {
+  animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes blur-in {

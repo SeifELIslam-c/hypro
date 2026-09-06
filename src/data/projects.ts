@@ -4,6 +4,17 @@ import hammaImg from "@/assets/hamma-1.webp";
 import interiorImg from "@/assets/interior-1.webp";
 import detailImg from "@/assets/detail-1.webp";
 import heroImg from "@/assets/hero.webp";
+import blocA1Img from "@/assets/bloc-a-1.webp";
+import blocA2Img from "@/assets/bloc-a-2.webp";
+import f4TerrasseImg from "@/assets/f4-terrasse.webp";
+import f4EtageImg from "@/assets/f4-etage.webp";
+import localCommercial1Img from "@/assets/local-commercial-1.webp";
+import localCommercial2Img from "@/assets/local-commercial-2.webp";
+import blocB1Img from "@/assets/bloc-b-1.webp";
+import f3TerrasseBlocBImg from "@/assets/f3-terrasse-bloc-b.webp";
+import blocbScaledImg from "@/assets/blocb-scaled.webp";
+import cheragaInterneImg from "@/assets/Cheraga-Bloc-B-interne-2-scaled.webp";
+import courScaledImg from "@/assets/cour-scaled.webp";
 
 export type MediaItem = {
   type: "image" | "video";
@@ -21,6 +32,9 @@ export type UnitType = {
   desc: string;
   poster: string;
   videoUrl?: string;
+  youtubeId?: string;
+  plans?: string[];
+  images?: string[];
   surfaces?: SurfaceRow[];
   totals?: SurfaceRow[];
 };
@@ -30,6 +44,8 @@ export type Block = {
   name: string;
   headline: string;
   desc: string;
+  heroImage?: string;
+  heroImages?: { src: string; title: string; desc?: string }[];
   stats: { label: string; value: string }[];
   units: UnitType[];
 };
@@ -65,10 +81,10 @@ const COMMON_DESCRIPTION = (city: string) => [
 ];
 
 const FEATURES = [
-  "Maison intelligente",
+  "Smart Home",
   "Climatisation centralisée",
   "Chauffage central",
-  "Cuisines et salles de bain équipées",
+  "Cuisines et salle de bain équipées",
   "Caméras de surveillance",
   "Parking sous-sol",
   "Aire de jeux",
@@ -81,6 +97,17 @@ const CHERAGA_BLOCKS: Block[] = [
     name: "Bloc A",
     headline: "Verticalité, lumière et double exposition",
     desc: "Douze appartements répartis sur six niveaux, deux logements par palier. Une double exposition, un ascenseur desservant chaque étage et un local commercial en rez-de-chaussée.",
+    heroImage: blocA1Img,
+    heroImages: [
+      {
+        src: blocA1Img,
+        title: "Vue Principale",
+      },
+      {
+        src: blocA2Img,
+        title: "Perspective d'Angle",
+      },
+    ],
     stats: [
       { label: "Appartements", value: "12" },
       { label: "Niveaux", value: "06" },
@@ -89,58 +116,74 @@ const CHERAGA_BLOCKS: Block[] = [
     units: [
       {
         code: "A1",
-        name: "F4 Simplex",
-        tag: "3 chambres + salon",
-        desc: "Un plan traversant, généreux et fluide : trois chambres, un salon largement ouvert sur la façade principale et une cuisine pensée pour la vie de famille.",
-        poster: interiorImg,
-        videoUrl: CHERAGA_VIDEO,
+        name: "F4 avec terrasse",
+        tag: "3 chambres + terrasse privative",
+        desc: "Le summum du confort urbain : un espace de vie traversant prolongé par une vaste terrasse privative plein ciel de 10,00 m², conçue pour capter la lumière du soir et offrir un cadre de vie extérieur privilégié.",
+        poster: f4TerrasseImg,
+        plans: [f4TerrasseImg],
+        images: [f4TerrasseImg],
+        youtubeId: "vmgB7GhO4oQ",
+        videoUrl: "https://www.youtube.com/watch?v=vmgB7GhO4oQ",
         surfaces: [
-          { label: "Salon", value: "26,87 m²" },
-          { label: "Cuisine", value: "14,41 m²" },
-          { label: "Chambre 01", value: "11,62 m²" },
-          { label: "Chambre 02", value: "18,52 m²" },
-          { label: "Chambre 03", value: "15,92 m²" },
-          { label: "Hall", value: "20,77 m²" },
+          { label: "Salon de réception", value: "18,61 m²" },
+          { label: "Terrasse privative", value: "10,00 m²" },
+          { label: "Cuisine ergonomique", value: "17,80 m²" },
+          { label: "Chambre 01 (Suite)", value: "14,69 m²" },
+          { label: "Chambre 02", value: "14,30 m²" },
+          { label: "Chambre 03", value: "12,62 m²" },
+          { label: "Hall & Dégagement", value: "16,65 m²" },
         ],
         totals: [
-          { label: "Surface habitable", value: "107,00 m²" },
-          { label: "Surface totale", value: "114,43 m²" },
+          { label: "Surface habitable", value: "94,67 m²" },
+          { label: "Terrasse plein ciel", value: "10,00 m²" },
+          { label: "Surface totale", value: "104,67 m²" },
         ],
       },
       {
         code: "A2",
-        name: "F4 avec terrasse",
-        tag: "3 chambres + terrasse",
-        desc: "Le même plan porté par un extérieur privatif : une terrasse orientée pour capter la lumière du soir, prolongement naturel du séjour.",
-        poster: cheragaImg,
-        videoUrl: CHERAGA_VIDEO,
+        name: "F4 étage courant",
+        tag: "3 chambres + salon panoramique",
+        desc: "Un agencement contemporain aux volumes généreux répartis sur les étages courants : salon panoramique baigné de lumière naturelle, cuisine ergonomique équipée, trois chambres indépendantes et balcons dégagés.",
+        poster: f4EtageImg,
+        plans: [f4EtageImg],
+        images: [f4EtageImg],
+        youtubeId: "wSPYwWVIBsk",
+        videoUrl: "https://www.youtube.com/watch?v=wSPYwWVIBsk",
         surfaces: [
-          { label: "Salon", value: "26,87 m²" },
-          { label: "Terrasse", value: "24,10 m²" },
-          { label: "Cuisine", value: "14,41 m²" },
-          { label: "Chambres", value: "3 × " },
+          { label: "Salon", value: "23,10 m²" },
+          { label: "Cuisine", value: "17,80 m²" },
+          { label: "Chambre 01 (Master)", value: "14,69 m²" },
+          { label: "Chambre 02", value: "14,30 m²" },
+          { label: "Chambre 03", value: "12,62 m²" },
+          { label: "Hall", value: "16,65 m²" },
         ],
         totals: [
-          { label: "Surface habitable", value: "114,43 m²" },
-          { label: "Surface totale", value: "138,53 m²" },
+          { label: "Surface habitable", value: "99,16 m²" },
+          { label: "Balcons", value: "7,43 m²" },
+          { label: "Surface totale", value: "106,59 m²" },
         ],
       },
       {
         code: "A3",
         name: "Local commercial",
-        tag: "Rez-de-chaussée",
-        desc: "Une surface commerciale en pied d'immeuble, en double hauteur de vitrine, pensée pour un commerce de proximité ou une activité libérale.",
-        poster: detailImg,
-        videoUrl: CHERAGA_VIDEO,
+        tag: "Rez-de-chaussée · Vitrine",
+        desc: "Une surface commerciale prestigieuse en pied d'immeuble, en double hauteur de vitrine, pensée pour un commerce de proximité ou une activité professionnelle libérale.",
+        poster: localCommercial1Img,
+        plans: [localCommercial1Img, localCommercial2Img],
+        youtubeId: "_-mgoGdCcAA",
+        videoUrl: "https://www.youtube.com/watch?v=_-mgoGdCcAA",
         surfaces: [
-          { label: "Réception", value: "25,28 m²" },
-          { label: "Espace 01", value: "17,87 m²" },
-          { label: "Espace 02", value: "18,96 m²" },
-          { label: "Sanitaires", value: "2,25 m²" },
+          { label: "ESPACE ATTENTE HOMME", value: "15,78 m²" },
+          { label: "ESPACE ATTENTE FEMME", value: "10,47 m²" },
+          { label: "WC", value: "2,25 m²" },
+          { label: "RECEPTION", value: "25,28 m²" },
+          { label: "ESPACE PRELEVEMENT", value: "9,00 m²" },
+          { label: "ESPACE ANALYSE", value: "17,87 m²" },
+          { label: "ESPACE DE RADIOLOGIE", value: "18,96 m²" },
         ],
         totals: [
-          { label: "Surface habitable", value: "126,66 m²" },
-          { label: "Surface totale", value: "128,04 m²" },
+          { label: "SURFACE HABITABLE", value: "126,66 m²" },
+          { label: "SURFACE TOTALE", value: "128,04 m²" },
         ],
       },
     ],
@@ -150,6 +193,13 @@ const CHERAGA_BLOCKS: Block[] = [
     name: "Bloc B",
     headline: "Intimité, cours privatives et vue dégagée",
     desc: "Dix appartements sur cinq niveaux, deux logements par étage. Les unités du rez-de-chaussée bénéficient d'une cour privative, les étages d'une vue dégagée sur l'aire de jeux.",
+    heroImage: blocB1Img,
+    heroImages: [
+      {
+        src: blocB1Img,
+        title: "Façade Principale",
+      },
+    ],
     stats: [
       { label: "Appartements", value: "10" },
       { label: "Niveaux", value: "05" },
@@ -158,63 +208,50 @@ const CHERAGA_BLOCKS: Block[] = [
     units: [
       {
         code: "B1",
-        name: "F2 avec cour",
-        tag: "1 chambre + cour",
-        desc: "Le format idéal pour un jeune couple : un séjour lumineux, une chambre calme et une cour privative qui double l'espace de vie.",
-        poster: interiorImg,
-        videoUrl: CHERAGA_VIDEO,
+        name: "F3 avec cours",
+        tag: "2 chambres + cour privative",
+        desc: "Un rez-de-chaussée traversant et lumineux prolongé par une superbe cour privative, pensé pour concilier confort intérieur et vie en plein air.",
+        poster: f3TerrasseBlocBImg,
+        plans: [f3TerrasseBlocBImg],
+        youtubeId: "HfgGeEFyNKU",
+        videoUrl: "https://www.youtube.com/watch?v=HfgGeEFyNKU",
         surfaces: [
-          { label: "Salon", value: "25,48 m²" },
-          { label: "Chambre", value: "11,24 m²" },
-          { label: "Hall", value: "8,62 m²" },
-          { label: "SDB", value: "3,91 m²" },
+          { label: "Salon de réception", value: "24,80 m²" },
+          { label: "Cour privative", value: "22,50 m²" },
+          { label: "Cuisine ergonomique", value: "12,60 m²" },
+          { label: "Chambre 01 (Suite)", value: "16,40 m²" },
+          { label: "Chambre 02", value: "13,20 m²" },
+          { label: "Hall & Dégagement", value: "11,50 m²" },
+          { label: "Salle de bain", value: "4,80 m²" },
         ],
         totals: [
-          { label: "Surface habitable", value: "63,72 m²" },
-          { label: "Cour", value: "42,01 m²" },
-          { label: "Surface totale", value: "119,87 m²" },
+          { label: "Surface habitable", value: "83,30 m²" },
+          { label: "Cour privative", value: "22,50 m²" },
+          { label: "Surface totale", value: "105,80 m²" },
         ],
       },
       {
         code: "B2",
-        name: "F4 avec cour",
-        tag: "3 chambres + cour",
-        desc: "Un rez-de-chaussée familial : trois chambres, un vaste hall de distribution et une cour privative orientée sur l'aire de jeux.",
-        poster: cheragaImg,
-        videoUrl: CHERAGA_VIDEO,
-        surfaces: [
-          { label: "Salon", value: "26,87 m²" },
-          { label: "Cuisine", value: "14,41 m²" },
-          { label: "Chambre 01", value: "11,62 m²" },
-          { label: "Chambre 02", value: "18,52 m²" },
-          { label: "Chambre 03", value: "15,92 m²" },
-          { label: "Hall", value: "20,77 m²" },
-        ],
-        totals: [
-          { label: "Surface habitable", value: "124,94 m²" },
-          { label: "Cour", value: "44,06 m²" },
-          { label: "Surface totale", value: "189,32 m²" },
-        ],
-      },
-      {
-        code: "B3",
         name: "F4 Simplex",
-        tag: "3 chambres, étages",
-        desc: "Aux niveaux supérieurs : un plan simplex spacieux et fonctionnel, entièrement tourné vers la vue dégagée entre les blocs A et B.",
-        poster: heroImg,
-        videoUrl: CHERAGA_VIDEO,
+        tag: "3 chambres + salon panoramique",
+        desc: "Un agencement contemporain aux volumes généreux répartis sur les étages courants : salon panoramique baigné de lumière naturelle, cuisine ergonomique équipée, trois chambres indépendantes et balcons dégagés.",
+        poster: f4EtageImg,
+        plans: [f4EtageImg],
+        images: [f4EtageImg],
+        youtubeId: "wSPYwWVIBsk",
+        videoUrl: "https://www.youtube.com/watch?v=wSPYwWVIBsk",
         surfaces: [
-          { label: "Salon", value: "25,08 m²" },
-          { label: "Cuisine", value: "13,37 m²" },
-          { label: "Chambre 01", value: "11,14 m²" },
-          { label: "Chambre 02", value: "18,28 m²" },
-          { label: "Chambre 03", value: "13,47 m²" },
-          { label: "Balcons", value: "2 × 4,45 m²" },
+          { label: "Salon", value: "23,10 m²" },
+          { label: "Cuisine", value: "17,80 m²" },
+          { label: "Chambre 01 (Master)", value: "14,69 m²" },
+          { label: "Chambre 02", value: "14,30 m²" },
+          { label: "Chambre 03", value: "12,62 m²" },
+          { label: "Hall", value: "16,65 m²" },
         ],
         totals: [
-          { label: "Surface habitable", value: "111,29 m²" },
-          { label: "Surface utile", value: "120,19 m²" },
-          { label: "Surface totale", value: "132,71 m²" },
+          { label: "Surface habitable", value: "99,16 m²" },
+          { label: "Balcons", value: "7,43 m²" },
+          { label: "Surface totale", value: "106,59 m²" },
         ],
       },
     ],
@@ -234,15 +271,15 @@ export const projects: Project[] = [
     ),
     features: FEATURES,
     blocks: CHERAGA_BLOCKS,
-    hero: cheragaImg,
+    hero: blocA2Img,
     heroVideo: CHERAGA_VIDEO,
     videoUrl: CHERAGA_VIDEO,
     vrUrl: "https://kuula.co/share/collection/710cN?logo=1&info=1&fs=1&vr=0&zoom=1&thumbs=0",
     media: [
-      { type: "image", src: cheragaImg, alt: "Façade de la Résidence HYPRO Cheraga" },
-      { type: "image", src: interiorImg, alt: "Intérieur d'un appartement type" },
-      { type: "image", src: detailImg, alt: "Détail architectural de la résidence" },
-      { type: "image", src: heroImg, alt: "Vue d'ensemble de la résidence" },
+      { type: "image", src: blocA2Img, alt: "Façade — Résidence HYPRO Cheraga" },
+      { type: "image", src: blocbScaledImg, alt: "Perspective — Résidence HYPRO Cheraga" },
+      { type: "image", src: cheragaInterneImg, alt: "Espace — Résidence HYPRO Cheraga" },
+      { type: "image", src: courScaledImg, alt: "Cour — Résidence HYPRO Cheraga" },
     ],
     mapQuery: "Cheraga, Alger, Algérie",
   },
